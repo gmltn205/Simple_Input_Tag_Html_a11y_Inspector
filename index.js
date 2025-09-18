@@ -243,10 +243,7 @@ function checkPassword(input) {
             break;
 
         }
-        if(judge)
-            withLabel++;
-        else
-            withoutLabel++;
+        
       });
       
 
@@ -258,3 +255,4 @@ function checkPassword(input) {
       
       resultDiv.innerHTML = result;
     }
+
