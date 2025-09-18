@@ -6,7 +6,7 @@ function basic_check(input,doc,index,type){
         let isRequired = input.hasAttribute('required');
         let isPattern=input.hasAttribute('pattern');
         let has_pat_pla=false;
-
+        let labelText='';
         if(isPattern){
           has_pat_pla = input.hasAttribute('placeholder');
         }
@@ -36,8 +36,9 @@ function basic_check(input,doc,index,type){
         if (id) {
             let ariaLabel = input.getAttribute('aria-label');
             let ariaDescribedby = input.getAttribute('aria-describedby');
-            if ((ariaLabel && ariaLabel.trim())||(ariaDescribedby && ariaDescribedby.trim())) {
-                ariaCheck=true;
+            if ((ariaLabel && ariaLabel.trim()) || (ariaDescribedby && ariaDescribedby.trim())) 
+            {
+              ariaCheck=true;
             }
         }
 
@@ -175,9 +176,7 @@ function checkPassword(input) {
 
     function checkInputs() {
       //갯수 세는 변수
-      let withLabel = 0; // 라벨이 있는 Input
-      let withoutLabel = 0; // 라벨이 없는 Input
-
+     
 
       let code = document.getElementById('input').value.trim();
       let resultDiv = document.getElementById('result');
