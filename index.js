@@ -213,12 +213,13 @@ function checkPassword(input) {
 
             case 'email' : 
             break;
-            //email은 형식만 지키면 되는데, 이 값은 이미 html 자체에서 알린다, 또한 이에 대한 알림은 label에서 처리가능
             
-             case 'text' : // 필수 입력 표시 ( 모든 영역 동일 -)
-             break;
+            email은 형식만 지키면 되는데, 이 값은 이미 html 자체에서 알린다, 또한 이에 대한 알림은 label에서 처리가능
+            
+            case 'text' : // 필수 입력 표시 ( 모든 영역 동일 -)
+            break;
 
-             basic check에서 대부분 처리한다.
+            basic check에서 대부분 처리한다.
 
           */
 
@@ -246,13 +247,6 @@ function checkPassword(input) {
         
       });
       
-
-    //요약 칸
     result += '</ul>';
-    //   result += `<p><strong>요약:</strong> `;
-    //   result += `<span class="ok">연결됨 ${withLabel}개</span>, `;
-    //   result += `<span class="warn">연결안됨 ${withoutLabel}개</span></p>`;
-      
-      resultDiv.innerHTML = result;
+    resultDiv.innerHTML = result;
     }
-
