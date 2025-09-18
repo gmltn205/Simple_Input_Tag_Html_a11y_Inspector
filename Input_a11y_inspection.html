@@ -1,0 +1,26 @@
+<html lang="ko"><head>
+  <meta charset="UTF-8">
+  <title>Input용 Label 점검 도구</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #f8fafc; }
+    h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+    textarea { width: 100%; height: 150px; margin-bottom: 1rem; padding: 1rem; border-radius: 8px; border: 1px solid #ccc; }
+    button { padding: 0.8em 1.5em; font-size: 1rem; border-radius: 5px; border: none; background: #2563eb; color: white; cursor: pointer; }
+    .result { background: white; border-radius: 8px; margin-top: 1rem; padding: 1.5rem; }
+    .ok { color: #22c55e; font-weight: bold; }
+    .warn { color: #dc2626; font-weight: bold; }
+    ul { margin: 0.5rem 0; }
+  </style>
+</head>
+<body>
+  <h1>Input용 Label 점검 도구</h1>
+  <p>input 코드를 붙여넣고 label 연결을 점검하세요.</p>
+  
+  <textarea id="input" placeholder="여기에 &lt;input&gt; 코드를 붙여넣으세요."></textarea>
+  <button onclick="checkInputs()">점검</button>
+
+  <div id="result" class="result" style="display:none"></div>
+
+  <script src="Input_a11y_inspection.js"></script>
+</body></html>
