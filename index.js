@@ -181,17 +181,27 @@ function basic_check(input, doc, index, type) {
             compliant.push("id 속성이 없지만, 암시적 label을 제공합니다.");
         
     } else {
-        compliant.push("id 속성이 제공되었습니다.");
+        if(hasLabel)
+            compliant.push("id와 label이 연결되어있습니다.");
+        else
+            {
+                issues.push("id 속성이 존재하지만, label과 연결되지 않았습니다.");
+
+            }
     }
     
     // ARIA 속성 검사
+    let h_ariaLabel = input.hasAttribute('aria-label');
+    let h_ariaLabelledby = input.hasAttribute('aria-labelledby');
+    let h_ariaDescribedby = input.hasAttribute('aria-describedby');
+
     let ariaLabel = input.getAttribute('aria-label');
     let ariaLabelledby = input.getAttribute('aria-labelledby');
     let ariaDescribedby = input.getAttribute('aria-describedby');
     
-    if (ariaLabel && ariaLabel.trim()) hasAriaLabel = true;
-    if (ariaLabelledby && ariaLabelledby.trim()) hasAriaLabelledby = true;
-    if (ariaDescribedby && ariaDescribedby.trim()) hasAriaDescribedby = true;
+    if (h_ariaLabel) hasAriaLabel = true;
+    if (h_ariaLabelledby) hasAriaLabelledby = true;
+    if (h_ariaDescribedby) hasAriaDescribedby = true;
     
 
     let all_des_have=false;
@@ -201,16 +211,34 @@ function basic_check(input, doc, index, type) {
         issues.push("설명을 제공하는 기능이 없습니다. → label, aria-label, aria-labelledby 및 aria-describedby 중 하나는 필수입니다.");
     } else {
         if (hasLabel) 
+        {
             compliant.push("label 태그가 올바르게 연결되었습니다.");
-        
+        }
         if (hasAriaLabel) 
-            compliant.push("aria-label이 제공되었습니다.");
-        
+        {
+            if(!ariaLabel.trim())
+            {
+                issues.push("ariaLabel 속성은 존재하나, 빈 값으로 되어있습니다. → ariaLabel 값을 설정하십시오");
+            }else
+                compliant.push("aria-label이 제공되었습니다.");
+        }
         if (hasAriaLabelledby) 
+        {
+            if(!ariaLabelledby.trim())
+            {
+                issues.push("ariaLabelledby 속성은 존재하나, 빈 값으로 되어있습니다. → ariaLabelledby 값을 설정하십시오");
+            }else
             compliant.push("aria-labelledby가 제공되었습니다.");
-        
+        }
         if(hasAriaDescribedby)
+        {
+            if(!ariaDescribedby.trim())
+            {   
+                issues.push("ariaDescribedby 속성은 존재하나, 빈 값으로 되어있습니다. → ariaDescribedby 값을 설정하십시오");
+        
+            }else
             compliant.push("aria-describedby로 추가 설명이 제공되었습니다.");
+        }
         all_des_have=true;
     }
     
@@ -225,24 +253,30 @@ function basic_check(input, doc, index, type) {
         }
     }
     
-    // 5. title 검사 Label이 있다면 검사 x
-    let titleStr = input.getAttribute('title');
-    if ((!titleStr || !titleStr.trim()) && !all_des_have) {
+    // 5. title 검사 Label이 있다면 검사 x && (!all_des_have)
+    let titleStr = input.hasAttribute('title');
+    let titleStrG = input.getAttribute('title');
+    if (titleStr) {
+        if(!titleStrG || !titleStrG.trim()){
+                issues.push("title 속성이 존재하지만, 값이 없습니다. → 마우스 호버 시 도움말 제공을 위해 title 값 설정을 권장합니다.");
+        }else{
+            compliant.push("title 속성이 제공되었습니다. 단, 구동 환경 및 스크린 리더기 종류에 따라 해당 내용을 읽지 않을수 도 있으며, 터치 기기나 키보드 사용자가 쉽게 접근하기 어려울 수 있습니다.");
+        }
+    }else {
         issues.push("title 속성이 없습니다. → 마우스 호버 시 도움말 제공을 위해 title 속성 추가를 권장합니다.");
-    } else {
-        compliant.push("title 속성이 제공되었습니다.");
+    
     }
     
-    // 6. 패턴 검사
-    let isPattern = input.hasAttribute('pattern');
-    if (isPattern) {
-        let hasPlaceholder = input.hasAttribute('placeholder');
-        if (!hasPlaceholder) {
-            issues.push("패턴 속성에 대한 안내가 없습니다. → placeholder로 입력 형식을 안내해주세요.");
-        } else {
-            compliant.push("입력 패턴에 대한 안내가 제공되었습니다.");
-        }
-    }
+    // // 6. 패턴 검사
+    // let isPattern = input.hasAttribute('pattern');
+    // if (isPattern) {
+    //     let hasPlaceholder = input.hasAttribute('placeholder');
+    //     if (!hasPlaceholder) {
+    //         issues.push("패턴 속성에 대한 안내가 없습니다. → placeholder로 입력 형식을 안내해주세요.");
+    //     } else {
+    //         compliant.push("입력 패턴에 대한 안내가 제공되었습니다.");
+    //     }
+    // }
     
     return { issues, compliant };
 }
@@ -483,6 +517,120 @@ function toggleMarkupErrors() {
     }
 }
 
+// 연결되지 않은 요소들을 분석하는 함수
+function analyzeUnconnectedElements(doc, validInputs) {
+    let unconnectedIds = [];
+    let unconnectedLabels = [];
+    let connectedIds = new Set();
+    let connectedForValues = new Set();
+    
+    // 연결된 ID들 찾기 (명시적 label)
+    let allLabels = doc.querySelectorAll('label[for]');
+    allLabels.forEach(label => {
+        let forValue = label.getAttribute('for');
+        if (forValue && forValue.trim()) {
+            let targetInput = doc.querySelector(`input[id="${forValue}"]`);
+            if (targetInput) {
+                connectedIds.add(forValue);
+                connectedForValues.add(forValue);
+            }
+        }
+    });
+    
+    // 암시적 label로 연결된 input들도 확인
+    validInputs.forEach(({input}) => {
+        if (input.closest('label')) {
+            if (input.id) {
+                connectedIds.add(input.id);
+            }
+        }
+    });
+    
+    // 연결되지 않은 input ID들 찾기
+    validInputs.forEach(({input}) => {
+        if (input.id && !connectedIds.has(input.id)) {
+            unconnectedIds.push(input.id);
+        }
+    });
+    
+    // 연결되지 않은 label for 값들 찾기
+    allLabels.forEach(label => {
+        let forValue = label.getAttribute('for');
+        if (forValue && forValue.trim()) {
+            let targetInput = doc.querySelector(`input[id="${forValue}"]`);
+            if (!targetInput) {
+                unconnectedLabels.push(forValue);
+            }
+        }
+    });
+    
+    return {
+        unconnectedIds,
+        unconnectedLabels,
+        hasIssues: unconnectedIds.length > 0 || unconnectedLabels.length > 0,
+        issueCount: unconnectedIds.length + unconnectedLabels.length
+    };
+}
+
+// 연결되지 않은 요소들의 HTML 생성
+function generateUnconnectedElementsHTML(analysis) {
+    let html = `
+        <div style="border: 1px solid #f59e0b; border-radius: 8px; margin: 10px 0; background: white;">
+            <div style="padding: 15px; background: #fef3c7; border-radius: 8px 8px 0 0; cursor: pointer; user-select: none;" 
+                 onclick="toggleUnconnectedDetail()">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="color: #f59e0b;">🔗 연결되지 않은 ID-Label 분석</strong>
+                        <span style="color: #f59e0b; font-weight: bold; margin-left: 10px;">${analysis.issueCount}개 발견</span>
+                    </div>
+                    <span id="unconnected-toggle-icon" style="font-size: 12px; color: #64748b;">▼</span>
+                </div>
+            </div>
+            
+            <div id="unconnected-detail" style="display: none; padding: 20px; border-top: 1px solid #e5e7eb;">
+    `;
+    
+    if (analysis.unconnectedIds.length > 0) {
+        html += `
+            <div style="margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: #f59e0b; font-size: 14px;">🏷️ 연결되지 않은 Input ID</h4>
+                <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 4px;">
+                    ${analysis.unconnectedIds.map(id => `<div style="color: #92400e; margin: 5px 0;">• id="${id}" → 해당하는 label for="${id}"가 없습니다.</div>`).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    if (analysis.unconnectedLabels.length > 0) {
+        html += `
+            <div>
+                <h4 style="margin: 0 0 10px 0; color: #f59e0b; font-size: 14px;">🎯 연결되지 않은 Label for</h4>
+                <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 4px;">
+                    ${analysis.unconnectedLabels.map(forValue => `<div style="color: #92400e; margin: 5px 0;">• for="${forValue}" → 해당하는 input id="${forValue}"가 없습니다.</div>`).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    html += `</div></div>`;
+    return html;
+}
+
+// 토글(연결되지 않은 라벨 확인용)
+function toggleUnconnectedDetail() {
+    let detail = document.getElementById('unconnected-detail');
+    let icon = document.getElementById('unconnected-toggle-icon');
+    
+    if (detail.style.display === 'none') {
+        detail.style.display = 'block';
+        icon.textContent = '▲';
+    } else {
+        detail.style.display = 'none';
+        icon.textContent = '▼';
+    }
+}
+
+
 //기본 함수 (html에서 호출)
 function checkInputs() {
     // 코드만 가져옴
@@ -582,6 +730,15 @@ function checkInputs() {
         
     });
     
+    let unconnectedAnalysis = analyzeUnconnectedElements(doc, validInputs);
+        
+        if (unconnectedAnalysis.hasIssues) {
+            let unconnectedHTML = generateUnconnectedElementsHTML(unconnectedAnalysis);
+            result += unconnectedHTML;
+            totalIssues += unconnectedAnalysis.issueCount;
+        }
+    
+
     result += '</div>';
 
     // 전체 요약 추가
