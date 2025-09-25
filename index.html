@@ -54,17 +54,17 @@
       <h3>접근성 검사 항목</h3>
       <ul>
         <li><strong>Label 연결</strong>: 스크린 리더가 입력 필드의 용도를 인식할 수 있는 label 태그 연결</li>
-        <li><strong>ARIA 속성</strong>: aria-label,aria-labelledby, aria-describedby 등 보조 기술을 위한 추가 정보</li>
+        <li>
+          <strong>ARIA 속성</strong>: aria-label,aria-labelledby, aria-describedby 등 보조 기술을 위한 추가 정보
+          <br>💡 참고로 label, aria-label, aria-labelledby, aria-describedby 속성이 중복 제공되면 화면 리더기는 우선 순위에 따라 선택적으로 설명을 읽습니다.
+        </li>
         <li><strong>필수 입력 표시</strong>: required 속성 사용 시 aria-required의 적절한 설정</li>
         <li>
           <strong>Title 속성</strong>: 마우스 호버 시 도움말을 제공하는 title 속성
-          <br>💡 참고로 label, aria-label, aria-labelledby, aria-describedby 속성이 중복 제공되면 화면 리더기는 우선 순위에 따라 선택적으로 설명을 읽습니다.
         </li>
-        <li><strong>패턴 안내</strong>: pattern 속성 사용 시 placeholder를 통한 입력 형식 안내</li>
         <li><strong>검사 타입</strong>: search, email, file, text, password 타입만 검사</li>
       </ul>
       
     </div>
   </div>
 </body></html>
-
